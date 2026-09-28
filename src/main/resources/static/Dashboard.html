@@ -90,43 +90,37 @@
             <button onclick="loadDashboard()"> Refresh</button>
         </div>
 
+        <div class="stats-grid">
 
-        <div class="cards">
-
-            <div class="card blue">
-                <div class="card-icon"></div>
-                <div>
-                    <span>Total Students</span>
-                    <h2 id="studentCount">0</h2>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <p>Total Students</p>
+                    <h2 id="totalStudents">0</h2>
                 </div>
             </div>
 
-            <div class="card purple">
-                <div class="card-icon"></div>
-                <div>
-                    <span>Total Schemes</span>
-                    <h2 id="schemeCount">0</h2>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <p>Total Schemes</p>
+                    <h2 id="totalSchemes">0</h2>
                 </div>
             </div>
 
-            <div class="card orange">
-                <div class="card-icon"></div>
-                <div>
-                    <span>Total Applications</span>
-                    <h2 id="applicationCount">0</h2>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <p>Total Applications</p>
+                    <h2 id="totalApplications">0</h2>
                 </div>
             </div>
 
-            <div class="card green">
-                <div class="card-icon"></div>
-                <div>
-                    <span>Completed Disbursement</span>
-                    <h2 id="disbursementCount">0</h2>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <p>Completed Disbursement</p>
+                    <h2 id="totalDisbursements">0</h2>
                 </div>
             </div>
 
         </div>
-
 
         <div class="dashboard-grid">
 
@@ -174,30 +168,22 @@
                     <h3>System Overview</h3>
                 </div>
 
-                <div class="overview">
-
-                    <div class="overview-item">
-                        <span>Eligible Applications</span>
-                        <div class="progress">
-                            <div id="eligibleBar"></div>
-                        </div>
-                    </div>
-
-                    <div class="overview-item">
-                        <span>Verified Applications</span>
-                        <div class="progress">
-                            <div id="verifiedBar"></div>
-                        </div>
-                    </div>
-
-                    <div class="overview-item">
-                        <span>Disbursed Applications</span>
-                        <div class="progress">
-                            <div id="disbursedBar"></div>
-                        </div>
-                    </div>
-
+                <div class="overview-card">
+                    <span>Eligible Applications</span>
+                    <strong id="eligibleApplications">0</strong>
                 </div>
+
+                <div class="overview-card">
+                    <span>Verified Applications</span>
+                    <strong id="verifiedApplications">0</strong>
+                </div>
+
+                <div class="overview-card">
+                    <span>Disbursed Applications</span>
+                    <strong id="disbursedApplications">0</strong>
+                </div>
+
+
 
             </div>
 
@@ -323,21 +309,34 @@
 
         <div class="panel">
 
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Student</th>
-                    <th>Scheme</th>
-                    <th>Eligibility</th>
-                    <th>Status</th>
-                    <th>Remarks</th>
-                </tr>
-                </thead>
+            <div class="table-section">
 
-                <tbody id="applicationTableBody">
-                </tbody>
-            </table>
+                <div class="section-header">
+                    <h3>Recent Applications</h3>
+                    <span>View All</span>
+                </div>
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Student</th>
+                            <th>Scheme</th>
+                            <th>Eligibility</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="applicationTableBody">
+                        </tbody>
+
+                    </table>
+
+                </div>
+                </div>
 
         </div>
 

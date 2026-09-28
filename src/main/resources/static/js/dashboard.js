@@ -1,297 +1,578 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    console.log("================================");
     console.log("ScholarTrack Dashboard Loaded");
-    console.log("================================");
 
     loadDashboard();
 
 });
 
 
+/* =========================================================
+   LOAD DASHBOARD
+========================================================= */
+
 async function loadDashboard() {
 
     try {
 
-        const students = await getData("/api/students");
-        const schemes = await getData("/api/schemes");
-        const applications = await getData("/api/applications");
-        const disbursements = await getData("/api/disbursements");
+        const students = await fetchData("/api/students");
+
+        const schemes = await fetchData("/api/schemes");
+
+        const applications = await fetchData("/api/applications");
+
+        const disbursements = await fetchData("/api/disbursements");
+
 
         console.log("Students:", students);
+
         console.log("Schemes:", schemes);
+
         console.log("Applications:", applications);
+
         console.log("Disbursements:", disbursements);
 
-        updateStudents(students);
-        updateSchemes(schemes);
-        updateApplications(applications);
-        updateDisbursements(disbursements);
 
-        updateStatistics(
-            students,
-            schemes,
-            applications,
-            disbursements
+        /* DASHBOARD CARDS */
+
+        setValue(
+            "studentCount",
+            students.length
         );
 
-    } catch (error) {
+        setValue(
+            "schemeCount",
+            schemes.length
+        );
 
-        console.error("DASHBOARD ERROR:", error);
+        setValue(
+            "applicationCount",
+            applications.length
+        );
+
+
+        const completedDisbursements =
+            disbursements.filter(
+                d =>
+                    d.disbursementStatus === "COMPLETED"
+            ).length;
+
+
+        setValue(
+            "disbursementCount",
+            completedDisbursements
+        );
+
+
+        /* OTHER SECTIONS */
+
+        updateApplications(applications);
+
+        updateSchemes(schemes);
+
+        updateApplicationStatus(applications);
+
+        updateSystemOverview(applications);
+
+    }
+    catch (error) {
+
+        console.error(
+            "Dashboard Error:",
+            error
+        );
 
     }
 
 }
 
 
-async function getData(url) {
+/* =========================================================
+   FETCH API DATA
+========================================================= */
+
+async function fetchData(url) {
 
     const response = await fetch(url);
 
-    console.log(url, "Status:", response.status);
+    console.log(
+        url + " -> " + response.status
+    );
+
 
     if (!response.ok) {
+
         throw new Error(
-            url + " returned HTTP " + response.status
+            "Failed to load " +
+            url +
+            " | HTTP " +
+            response.status
         );
+
     }
+
 
     return await response.json();
+
 }
 
 
-/* =========================
-   STUDENTS
-========================= */
+/* =========================================================
+   SET HTML VALUE
+========================================================= */
 
-function updateStudents(students) {
+function setValue(id, value) {
 
     const element =
-        document.getElementById("totalStudents");
+        document.getElementById(id);
+
 
     if (element) {
-        element.innerText = students.length;
+
+        element.innerText = value;
+
+    }
+    else {
+
+        console.warn(
+            "HTML element not found: " + id
+        );
+
     }
 
 }
 
 
-/* =========================
-   SCHEMES
-========================= */
+/* =========================================================
+   RECENT APPLICATIONS
+========================================================= */
+
+function updateApplications(applications) {
+
+    console.log(
+        "Updating Applications:",
+        applications.length
+    );
+
+
+    const tableBody =
+        document.getElementById(
+            "applicationTableBody"
+        );
+
+
+    if (!tableBody) {
+
+        console.error(
+            "applicationTableBody not found"
+        );
+
+        return;
+
+    }
+
+
+    tableBody.innerHTML = "";
+
+
+    if (applications.length === 0) {
+
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    No applications found
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+
+    applications.forEach(application => {
+
+
+        const studentName =
+            application.student &&
+            application.student.name
+                ? application.student.name
+                : "-";
+
+
+        const schemeName =
+            application.scheme &&
+            application.scheme.schemeName
+                ? application.scheme.schemeName
+                : "-";
+
+
+        const eligibility =
+            application.eligibilityStatus
+                ? application.eligibilityStatus
+                : "-";
+
+
+        const applicationStatus =
+            application.applicationStatus
+                ? application.applicationStatus
+                : "-";
+
+
+        const row =
+            document.createElement("tr");
+
+
+        row.innerHTML = `
+
+            <td>
+                ${application.applicationId}
+            </td>
+
+            <td>
+                ${studentName}
+            </td>
+
+            <td>
+                ${schemeName}
+            </td>
+
+            <td>
+                <span class="status ${getStatusClass(eligibility)}">
+                    ${eligibility}
+                </span>
+            </td>
+
+            <td>
+                <span class="status ${getStatusClass(applicationStatus)}">
+                    ${applicationStatus}
+                </span>
+            </td>
+
+        `;
+
+
+        tableBody.appendChild(row);
+
+    });
+
+}
+
+
+/* =========================================================
+   SCHOLARSHIP SCHEMES
+========================================================= */
 
 function updateSchemes(schemes) {
 
-    const element =
-        document.getElementById("totalSchemes");
+    console.log(
+        "Updating Schemes:",
+        schemes.length
+    );
 
-    if (element) {
-        element.innerText = schemes.length;
-    }
 
-    const table =
-        document.getElementById("schemeTableBody");
+    const tableBody =
+        document.getElementById(
+            "schemeTableBody"
+        );
 
-    if (!table) {
-        console.error("schemeTableBody not found");
+
+    if (!tableBody) {
+
+        console.error(
+            "schemeTableBody not found"
+        );
+
         return;
+
     }
 
-    table.innerHTML = "";
+
+    tableBody.innerHTML = "";
+
+
+    if (schemes.length === 0) {
+
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    No scholarship schemes found
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
 
     schemes.forEach(scheme => {
 
-        const row = document.createElement("tr");
+
+        const row =
+            document.createElement("tr");
+
 
         row.innerHTML = `
-            <td>${scheme.schemeId}</td>
 
-            <td>${scheme.schemeName}</td>
+            <td>
+                ${scheme.schemeId}
+            </td>
 
-            <td>${scheme.description || "-"}</td>
+            <td>
+                ${scheme.schemeName}
+            </td>
 
-            <td>₹${Number(scheme.incomeLimit).toLocaleString("en-IN")}</td>
+            <td>
+                ${scheme.description || "-"}
+            </td>
 
-            <td>${scheme.minimumMarks}%</td>
+            <td>
+                ₹${formatNumber(scheme.incomeLimit)}
+            </td>
 
-            <td>₹${Number(scheme.scholarshipAmount).toLocaleString("en-IN")}</td>
+            <td>
+                ${scheme.minimumMarks}%
+            </td>
+
+            <td>
+                ₹${formatNumber(scheme.scholarshipAmount)}
+            </td>
 
             <td>
                 <span class="status active">
                     ${scheme.status || "ACTIVE"}
                 </span>
             </td>
+
         `;
 
-        table.appendChild(row);
+
+        tableBody.appendChild(row);
 
     });
 
 }
 
 
-/* =========================
-   APPLICATIONS
-========================= */
+/* =========================================================
+   APPLICATION STATUS
+========================================================= */
 
-function updateApplications(applications) {
+function updateApplicationStatus(applications) {
 
-    const total =
-        document.getElementById("totalApplications");
-
-    if (total) {
-        total.innerText = applications.length;
-    }
-
-    const table =
-        document.getElementById("applicationTableBody");
-
-    if (!table) {
-        console.error("applicationTableBody not found");
-        return;
-    }
-
-    table.innerHTML = "";
-
-    applications.forEach(application => {
-
-        const studentName =
-            application.student
-                ? application.student.name
-                : "-";
-
-        const schemeName =
-            application.scheme
-                ? application.scheme.schemeName
-                : "-";
-
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-            <td>${application.applicationId}</td>
-
-            <td>${studentName}</td>
-
-            <td>${schemeName}</td>
-
-            <td>
-                <span class="status eligible">
-                    ${application.eligibilityStatus || "-"}
-                </span>
-            </td>
-
-            <td>
-                <span class="status rejected">
-                    ${application.applicationStatus || "-"}
-                </span>
-            </td>
-
-            <td>
-                ${application.remarks || "-"}
-            </td>
-        `;
-
-        table.appendChild(row);
-
-    });
-
-}
-
-
-/* =========================
-   DISBURSEMENTS
-========================= */
-
-function updateDisbursements(disbursements) {
-
-    const total =
-        document.getElementById("totalDisbursements");
-
-    if (total) {
-
-        const completed =
-            disbursements.filter(
-                d => d.disbursementStatus === "COMPLETED"
-            ).length;
-
-        total.innerText = completed;
-    }
-
-}
-
-
-/* =========================
-   DASHBOARD STATISTICS
-========================= */
-
-function updateStatistics(
-    students,
-    schemes,
-    applications,
-    disbursements
-) {
 
     const eligible =
         applications.filter(
-            a => a.eligibilityStatus === "ELIGIBLE"
+            application =>
+                application.eligibilityStatus ===
+                "ELIGIBLE"
         ).length;
+
 
     const underReview =
         applications.filter(
-            a => a.applicationStatus === "UNDER_REVIEW"
+            application =>
+                application.applicationStatus ===
+                "UNDER_REVIEW"
         ).length;
+
 
     const verified =
         applications.filter(
-            a => a.applicationStatus === "VERIFIED"
+            application =>
+                application.applicationStatus ===
+                "VERIFIED"
         ).length;
+
 
     const rejected =
         applications.filter(
-            a => a.applicationStatus === "REJECTED"
+            application =>
+                application.applicationStatus ===
+                "REJECTED"
         ).length;
+
 
     const disbursed =
         applications.filter(
-            a => a.applicationStatus === "DISBURSED"
+            application =>
+                application.applicationStatus ===
+                "DISBURSED"
         ).length;
 
 
-    setText("eligibleCount", eligible);
+    console.log(
+        "Status:",
+        {
+            eligible,
+            underReview,
+            verified,
+            rejected,
+            disbursed
+        }
+    );
 
-    setText("underReviewCount", underReview);
 
-    setText("verifiedCount", verified);
+    /* APPLICATION STATUS CARDS */
 
-    setText("rejectedCount", rejected);
+    setValue(
+        "eligibleCount",
+        eligible
+    );
 
-    setText("disbursedCount", disbursed);
+
+    setValue(
+        "underReviewCount",
+        underReview
+    );
 
 
-    setText("eligibleApplications", eligible);
+    setValue(
+        "verifiedCount",
+        verified
+    );
 
-    setText("verifiedApplications", verified);
 
-    setText("disbursedApplications", disbursed);
+    setValue(
+        "rejectedCount",
+        rejected
+    );
+
+
+    setValue(
+        "disbursedCount",
+        disbursed
+    );
 
 }
 
 
-function setText(id, value) {
+/* =========================================================
+   SYSTEM OVERVIEW
+========================================================= */
 
-    const element =
-        document.getElementById(id);
+function updateSystemOverview(applications) {
 
-    if (element) {
-        element.innerText = value;
+
+    const eligible =
+        applications.filter(
+            application =>
+                application.eligibilityStatus ===
+                "ELIGIBLE"
+        ).length;
+
+
+    const verified =
+        applications.filter(
+            application =>
+                application.applicationStatus ===
+                "VERIFIED"
+        ).length;
+
+
+    const disbursed =
+        applications.filter(
+            application =>
+                application.applicationStatus ===
+                "DISBURSED"
+        ).length;
+
+
+    setValue(
+        "eligibleApplications",
+        eligible
+    );
+
+
+    setValue(
+        "verifiedApplications",
+        verified
+    );
+
+
+    setValue(
+        "disbursedApplications",
+        disbursed
+    );
+
+}
+
+
+/* =========================================================
+   STATUS CSS CLASS
+========================================================= */
+
+function getStatusClass(status) {
+
+    if (!status) {
+        return "";
+    }
+
+
+    switch (
+        status.toUpperCase()
+        ) {
+
+        case "ELIGIBLE":
+            return "eligible";
+
+
+        case "UNDER_REVIEW":
+            return "under-review";
+
+
+        case "VERIFIED":
+            return "verified";
+
+
+        case "REJECTED":
+            return "rejected";
+
+
+        case "DISBURSED":
+            return "disbursed";
+
+
+        case "ACTIVE":
+            return "active";
+
+
+        default:
+            return "";
+
     }
 
 }
 
 
-/* =========================
-   REFRESH
-========================= */
+/* =========================================================
+   NUMBER FORMAT
+========================================================= */
+
+function formatNumber(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+
+        return "0";
+
+    }
+
+
+    return Number(value).toLocaleString(
+        "en-IN"
+    );
+
+}
+
+
+/* =========================================================
+   REFRESH DASHBOARD
+========================================================= */
 
 function refreshDashboard() {
 

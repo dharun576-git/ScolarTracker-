@@ -9,7 +9,17 @@ body {
     background: #f4f7fb;
     color: #1f2937;
 }
+.stats-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    width: 100%;
+}
 
+.stats-grid .stat-card {
+    flex: 1;
+    min-width: 0;
+}
 .sidebar {
     position: fixed;
     left: 0;
