@@ -185,132 +185,521 @@ async function loadDashboard() {
 /* =========================================================
    ADD STUDENT
 ========================================================= */
-
-function setupStudentForm() {
-
-    const form =
-        document.getElementById("studentForm");
-
-
-    if (!form) {
-        return;
-    }
+const studentName = document.getElementById("studentName");
+const studentEmail = document.getElementById("studentEmail");
+const studentPhone = document.getElementById("studentPhone");
+const studentIncome = document.getElementById("studentIncome");
+const studentMarks = document.getElementById("studentMarks");
+const studentCourse = document.getElementById("studentCourse");
+const studentYear = document.getElementById("studentYear");
 
 
-    form.addEventListener(
-        "submit",
-        async function (event) {
-
-            event.preventDefault();
-
-
-            const student = {
-
-                name:
-                document.getElementById(
-                    "studentName"
-                ).value,
-
-                email:
-                document.getElementById(
-                    "studentEmail"
-                ).value,
-
-                phone:
-                document.getElementById(
-                    "studentPhone"
-                ).value,
-
-                annualIncome:
-                    Number(
-                        document.getElementById(
-                            "studentIncome"
-                        ).value
-                    ),
-
-                marks:
-                    Number(
-                        document.getElementById(
-                            "studentMarks"
-                        ).value
-                    ),
-
-                course:
-                document.getElementById(
-                    "studentCourse"
-                ).value,
-
-                year:
-                    Number(
-                        document.getElementById(
-                            "studentYear"
-                        ).value
-                    )
-
-            };
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        "/api/students",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body:
-                                JSON.stringify(student)
-                        }
-                    );
-
-
-                const result =
-                    await readResponse(response);
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        getErrorMessage(result)
-                    );
-
-                }
-
-
-                showMessage(
-                    "studentMessage",
-                    "Student added successfully.",
-                    true
-                );
-
-
-                form.reset();
-
-
-                await loadDashboard();
-
-            }
-
-            catch (error) {
-
-                showMessage(
-                    "studentMessage",
-                    error.message,
-                    false
-                );
-
-            }
-
-        }
-    );
-
+function showError(id, message) {
+    document.getElementById(id).textContent = message;
 }
 
+
+function clearError(id) {
+    document.getElementById(id).textContent = "";
+}
+
+
+/* STUDENT NAME */
+
+studentName.addEventListener("input", function () {
+
+    this.value = this.value.replace(/[^A-Za-z ]/g, "");
+
+    if (this.value.trim() === "") {
+        showError(
+            "studentNameError",
+            "Student name is required"
+        );
+    } else {
+        clearError("studentNameError");
+    }
+});
+
+
+/* EMAIL */
+
+studentEmail.addEventListener("input", function () {
+
+    const emailPattern =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (this.value.trim() === "") {
+
+        showError(
+            "studentEmailError",
+            "Email is required"
+        );
+
+    } else if (!emailPattern.test(this.value)) {
+
+        showError(
+            "studentEmailError",
+            "Enter a valid email address"
+        );
+
+    } else {
+
+        clearError("studentEmailError");
+    }
+});
+
+
+/* PHONE */
+
+studentPhone.addEventListener("input", function () {
+
+    this.value = this.value.replace(/\D/g, "");
+
+    if (this.value.length !== 10) {
+
+        showError(
+            "studentPhoneError",
+            "Phone number must contain exactly 10 digits"
+        );
+
+    } else {
+
+        clearError("studentPhoneError");
+    }
+});
+
+
+/* ANNUAL INCOME */
+
+studentIncome.addEventListener("input", function () {
+
+    const value = Number(this.value);
+
+    if (this.value === "") {
+
+        showError(
+            "studentIncomeError",
+            "Annual income is required"
+        );
+
+    } else if (value < 0) {
+
+        showError(
+            "studentIncomeError",
+            "Income cannot be negative"
+        );
+
+    } else {
+
+        clearError("studentIncomeError");
+    }
+});
+
+
+/* MARKS */
+
+studentMarks.addEventListener("input", function () {
+
+    const value = Number(this.value);
+
+    if (this.value === "") {
+
+        showError(
+            "studentMarksError",
+            "Marks are required"
+        );
+
+    } else if (value < 0 || value > 100) {
+
+        showError(
+            "studentMarksError",
+            "Marks must be between 0 and 100"
+        );
+
+    } else {
+
+        clearError("studentMarksError");
+    }
+});
+
+
+/* COURSE */
+
+studentCourse.addEventListener("input", function () {
+
+    this.value = this.value.replace(/[^A-Za-z ]/g, "");
+
+    if (this.value.trim() === "") {
+
+        showError(
+            "studentCourseError",
+            "Course is required"
+        );
+
+    } else {
+
+        clearError("studentCourseError");
+    }
+});
+
+
+/* YEAR */
+
+studentYear.addEventListener("input", function () {
+
+    this.value = this.value.replace(/\D/g, "");
+
+    const value = Number(this.value);
+
+    if (this.value === "") {
+
+        showError(
+            "studentYearError",
+            "Year is required"
+        );
+
+    } else if (value < 1 || value > 10) {
+
+        showError(
+            "studentYearError",
+            "Enter a valid year"
+        );
+
+    } else {
+
+        clearError("studentYearError");
+    }
+});
+
+
+/* SUBMIT */
+
+document.getElementById("studentForm").addEventListener(
+    "submit",
+    async function (event) {
+
+        event.preventDefault();
+
+        let valid = true;
+
+        const emailPattern =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+        /* NAME */
+
+        if (!studentName.value.trim()) {
+
+            showError(
+                "studentNameError",
+                "Student name is required"
+            );
+
+            valid = false;
+        }
+
+
+        /* EMAIL */
+
+        if (!emailPattern.test(studentEmail.value.trim())) {
+
+            showError(
+                "studentEmailError",
+                "Enter a valid email address"
+            );
+
+            valid = false;
+        }
+
+
+        /* PHONE */
+
+        if (!/^\d{10}$/.test(studentPhone.value)) {
+
+            showError(
+                "studentPhoneError",
+                "Phone number must contain exactly 10 digits"
+            );
+
+            valid = false;
+        }
+
+
+        /* INCOME */
+
+        if (
+            studentIncome.value === "" ||
+            Number(studentIncome.value) < 0
+        ) {
+
+            showError(
+                "studentIncomeError",
+                "Enter a valid annual income"
+            );
+
+            valid = false;
+        }
+
+
+        /* MARKS */
+
+        if (
+            studentMarks.value === "" ||
+            Number(studentMarks.value) < 0 ||
+            Number(studentMarks.value) > 100
+        ) {
+
+            showError(
+                "studentMarksError",
+                "Marks must be between 0 and 100"
+            );
+
+            valid = false;
+        }
+
+
+        /* COURSE */
+
+        if (!studentCourse.value.trim()) {
+
+            showError(
+                "studentCourseError",
+                "Course is required"
+            );
+
+            valid = false;
+        }
+
+
+        /* YEAR */
+
+        if (
+            studentYear.value === "" ||
+            Number(studentYear.value) < 1 ||
+            Number(studentYear.value) > 10
+        ) {
+
+            showError(
+                "studentYearError",
+                "Enter a valid year"
+            );
+
+            valid = false;
+        }
+
+
+        if (!valid) {
+            return;
+        }
+
+
+        const student = {
+
+            name: studentName.value.trim(),
+
+            email: studentEmail.value.trim(),
+
+            phone: studentPhone.value.trim(),
+
+            annualIncome:
+                Number(studentIncome.value),
+
+            marks:
+                Number(studentMarks.value),
+
+            course:
+                studentCourse.value.trim(),
+
+            year:
+                Number(studentYear.value)
+        };
+
+
+        try {
+
+            const response = await fetch(
+                "/api/students",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(student)
+                }
+            );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    "Failed to add student"
+                );
+            }
+
+
+            document.getElementById(
+                "studentMessage"
+            ).innerHTML =
+                `<span class="success-message">
+                    Student added successfully
+                </span>`;
+
+
+            document.getElementById(
+                "studentForm"
+            ).reset();
+
+
+            loadDashboard();
+
+
+        } catch (error) {
+
+            document.getElementById(
+                "studentMessage"
+            ).innerHTML =
+                `<span class="error-message">
+                    ${error.message}
+                </span>`;
+        }
+
+    }
+);
+async function viewStudents() {
+
+    const studentList =
+        document.getElementById("studentList");
+
+    try {
+
+        const response =
+            await fetch("/api/students");
+
+        if (!response.ok) {
+            throw new Error("Unable to load students");
+        }
+
+        const students =
+            await response.json();
+
+        if (students.length === 0) {
+
+            studentList.innerHTML =
+                "<p class='empty-message'>No students found.</p>";
+
+            return;
+        }
+
+
+        let html = `
+            <div class="student-list-header">
+                <h3>All Students</h3>
+                <span>${students.length} Students</span>
+            </div>
+
+            <div class="student-table-container">
+
+                <table class="student-table">
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Income</th>
+                            <th>Marks</th>
+                            <th>Course</th>
+                            <th>Year</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+        `;
+
+
+        students.forEach(function(student) {
+
+            html += `
+                <tr>
+
+                    <td>${student.studentId}</td>
+
+                    <td>
+                        <strong>
+                            ${escapeHtml(student.name)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${escapeHtml(student.email)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(student.phone || "-")}
+                    </td>
+
+                    <td>
+                        ₹${Number(
+                student.annualIncome || 0
+            ).toLocaleString("en-IN")}
+                    </td>
+
+                    <td>
+                        ${student.marks || 0}%
+                    </td>
+
+                    <td>
+                        ${escapeHtml(student.course || "-")}
+                    </td>
+
+                    <td>
+                        ${student.year || "-"}
+                    </td>
+
+                </tr>
+            `;
+
+        });
+
+
+        html += `
+                    </tbody>
+
+                </table>
+
+            </div>
+        `;
+
+
+        studentList.innerHTML = html;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Student Loading Error:",
+            error
+        );
+
+        studentList.innerHTML = `
+            <p class="error-message">
+                Unable to load students.
+            </p>
+        `;
+
+    }
+}
 
 /* =========================================================
    ADD SCHEME
