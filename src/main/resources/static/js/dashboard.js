@@ -1,8 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    console.log("ScholarTrack Dashboard Loaded");
-
     loadDashboard();
+
+    setupStudentForm();
+    setupSchemeForm();
+    setupApplicationForm();
+    setupVerificationForm();
+    setupDisbursementForm();
 
 });
 
@@ -15,66 +19,157 @@ async function loadDashboard() {
 
     try {
 
-        const students = await fetchData("/api/students");
+        const [
+            studentsResponse,
+            schemesResponse,
+            applicationsResponse,
+            disbursementsResponse
+        ] = await Promise.all([
 
-        const schemes = await fetchData("/api/schemes");
+            fetch("/api/students"),
+            fetch("/api/schemes"),
+            fetch("/api/applications"),
+            fetch("/api/disbursements")
 
-        const applications = await fetchData("/api/applications");
+        ]);
 
-        const disbursements = await fetchData("/api/disbursements");
+
+        if (!studentsResponse.ok) {
+            throw new Error("Unable to load students");
+        }
+
+        if (!schemesResponse.ok) {
+            throw new Error("Unable to load schemes");
+        }
+
+        if (!applicationsResponse.ok) {
+            throw new Error("Unable to load applications");
+        }
+
+        if (!disbursementsResponse.ok) {
+            throw new Error("Unable to load disbursements");
+        }
+
+
+        const students = await studentsResponse.json();
+        const schemes = await schemesResponse.json();
+        const applications = await applicationsResponse.json();
+        const disbursements = await disbursementsResponse.json();
 
 
         console.log("Students:", students);
-
         console.log("Schemes:", schemes);
-
         console.log("Applications:", applications);
-
         console.log("Disbursements:", disbursements);
 
 
-        /* DASHBOARD CARDS */
+        /* STATISTICS */
 
-        setValue(
-            "studentCount",
+        setElement(
+            "totalStudents",
             students.length
         );
 
-        setValue(
-            "schemeCount",
+        setElement(
+            "totalSchemes",
             schemes.length
         );
 
-        setValue(
-            "applicationCount",
+        setElement(
+            "totalApplications",
             applications.length
         );
 
 
         const completedDisbursements =
-            disbursements.filter(
-                d =>
-                    d.disbursementStatus === "COMPLETED"
-            ).length;
+            disbursements.filter(function (item) {
+
+                return item.disbursementStatus === "COMPLETED";
+
+            }).length;
 
 
-        setValue(
-            "disbursementCount",
+        setElement(
+            "totalDisbursements",
             completedDisbursements
         );
 
 
-        /* OTHER SECTIONS */
+        /* APPLICATION STATUS */
 
-        updateApplications(applications);
+        const eligible =
+            applications.filter(function (application) {
 
-        updateSchemes(schemes);
+                return application.eligibilityStatus === "ELIGIBLE";
 
-        updateApplicationStatus(applications);
+            }).length;
 
-        updateSystemOverview(applications);
+
+        const underReview =
+            applications.filter(function (application) {
+
+                return application.applicationStatus === "UNDER_REVIEW";
+
+            }).length;
+
+
+        const verified =
+            applications.filter(function (application) {
+
+                return application.applicationStatus === "VERIFIED";
+
+            }).length;
+
+
+        const rejected =
+            applications.filter(function (application) {
+
+                return application.applicationStatus === "REJECTED";
+
+            }).length;
+
+
+        const disbursed =
+            applications.filter(function (application) {
+
+                return application.applicationStatus === "DISBURSED";
+
+            }).length;
+
+
+        setElement("eligibleCount", eligible);
+        setElement("underReviewCount", underReview);
+        setElement("verifiedCount", verified);
+        setElement("rejectedCount", rejected);
+        setElement("disbursedCount", disbursed);
+
+
+        /* SYSTEM OVERVIEW */
+
+        setElement(
+            "eligibleApplications",
+            eligible
+        );
+
+        setElement(
+            "verifiedApplications",
+            verified
+        );
+
+        setElement(
+            "disbursedApplications",
+            disbursed
+        );
+
+
+        /* TABLES */
+
+        displaySchemes(schemes);
+
+        displayApplications(applications);
 
     }
+
     catch (error) {
 
         console.error(
@@ -88,40 +183,826 @@ async function loadDashboard() {
 
 
 /* =========================================================
-   FETCH API DATA
+   ADD STUDENT
 ========================================================= */
 
-async function fetchData(url) {
+function setupStudentForm() {
 
-    const response = await fetch(url);
-
-    console.log(
-        url + " -> " + response.status
-    );
+    const form =
+        document.getElementById("studentForm");
 
 
-    if (!response.ok) {
-
-        throw new Error(
-            "Failed to load " +
-            url +
-            " | HTTP " +
-            response.status
-        );
-
+    if (!form) {
+        return;
     }
 
 
-    return await response.json();
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const student = {
+
+                name:
+                document.getElementById(
+                    "studentName"
+                ).value,
+
+                email:
+                document.getElementById(
+                    "studentEmail"
+                ).value,
+
+                phone:
+                document.getElementById(
+                    "studentPhone"
+                ).value,
+
+                annualIncome:
+                    Number(
+                        document.getElementById(
+                            "studentIncome"
+                        ).value
+                    ),
+
+                marks:
+                    Number(
+                        document.getElementById(
+                            "studentMarks"
+                        ).value
+                    ),
+
+                course:
+                document.getElementById(
+                    "studentCourse"
+                ).value,
+
+                year:
+                    Number(
+                        document.getElementById(
+                            "studentYear"
+                        ).value
+                    )
+
+            };
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/students",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify(student)
+                        }
+                    );
+
+
+                const result =
+                    await readResponse(response);
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        getErrorMessage(result)
+                    );
+
+                }
+
+
+                showMessage(
+                    "studentMessage",
+                    "Student added successfully.",
+                    true
+                );
+
+
+                form.reset();
+
+
+                await loadDashboard();
+
+            }
+
+            catch (error) {
+
+                showMessage(
+                    "studentMessage",
+                    error.message,
+                    false
+                );
+
+            }
+
+        }
+    );
 
 }
 
 
 /* =========================================================
-   SET HTML VALUE
+   ADD SCHEME
 ========================================================= */
 
-function setValue(id, value) {
+function setupSchemeForm() {
+
+    const form =
+        document.getElementById("schemeForm");
+
+
+    if (!form) {
+        return;
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const scheme = {
+
+                schemeName:
+                document.getElementById(
+                    "schemeName"
+                ).value,
+
+                description:
+                document.getElementById(
+                    "schemeDescription"
+                ).value,
+
+                incomeLimit:
+                    Number(
+                        document.getElementById(
+                            "incomeLimit"
+                        ).value
+                    ),
+
+                minimumMarks:
+                    Number(
+                        document.getElementById(
+                            "minimumMarks"
+                        ).value
+                    ),
+
+                scholarshipAmount:
+                    Number(
+                        document.getElementById(
+                            "scholarshipAmount"
+                        ).value
+                    ),
+
+                status:
+                document.getElementById(
+                    "schemeStatus"
+                ).value
+
+            };
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/schemes",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify(scheme)
+                        }
+                    );
+
+
+                const result =
+                    await readResponse(response);
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        getErrorMessage(result)
+                    );
+
+                }
+
+
+                showMessage(
+                    "schemeMessage",
+                    "Scholarship scheme added successfully.",
+                    true
+                );
+
+
+                form.reset();
+
+
+                await loadDashboard();
+
+            }
+
+            catch (error) {
+
+                showMessage(
+                    "schemeMessage",
+                    error.message,
+                    false
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SUBMIT APPLICATION
+========================================================= */
+
+function setupApplicationForm() {
+
+    const form =
+        document.getElementById(
+            "applicationForm"
+        );
+
+
+    if (!form) {
+        return;
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const application = {
+
+                studentId:
+                    Number(
+                        document.getElementById(
+                            "applicationStudentId"
+                        ).value
+                    ),
+
+                schemeId:
+                    Number(
+                        document.getElementById(
+                            "applicationSchemeId"
+                        ).value
+                    )
+
+            };
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/applications",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify(application)
+                        }
+                    );
+
+
+                const result =
+                    await readResponse(response);
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        getErrorMessage(result)
+                    );
+
+                }
+
+
+                showMessage(
+                    "applicationMessage",
+                    "Application submitted successfully.",
+                    true
+                );
+
+
+                form.reset();
+
+
+                await loadDashboard();
+
+            }
+
+            catch (error) {
+
+                showMessage(
+                    "applicationMessage",
+                    error.message,
+                    false
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   VERIFICATION
+========================================================= */
+
+function setupVerificationForm() {
+
+    const form =
+        document.getElementById(
+            "verificationForm"
+        );
+
+
+    if (!form) {
+        return;
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const applicationId =
+                document.getElementById(
+                    "verificationApplicationId"
+                ).value;
+
+
+            const verification = {
+
+                verifierName:
+                document.getElementById(
+                    "verifierName"
+                ).value,
+
+                verificationStatus:
+                document.getElementById(
+                    "verificationStatus"
+                ).value,
+
+                remarks:
+                document.getElementById(
+                    "verificationRemarks"
+                ).value
+
+            };
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/verifications/" +
+                        applicationId,
+                        {
+                            method: "PUT",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    verification
+                                )
+                        }
+                    );
+
+
+                const result =
+                    await readResponse(response);
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        getErrorMessage(result)
+                    );
+
+                }
+
+
+                showMessage(
+                    "verificationMessage",
+                    "Application verification completed successfully.",
+                    true
+                );
+
+
+                form.reset();
+
+
+                await loadDashboard();
+
+            }
+
+            catch (error) {
+
+                showMessage(
+                    "verificationMessage",
+                    error.message,
+                    false
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DISBURSEMENT
+========================================================= */
+
+function setupDisbursementForm() {
+
+    const form =
+        document.getElementById(
+            "disbursementForm"
+        );
+
+
+    if (!form) {
+        return;
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const applicationId =
+                document.getElementById(
+                    "disbursementApplicationId"
+                ).value;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/disbursements/" +
+                        applicationId,
+                        {
+                            method: "POST"
+                        }
+                    );
+
+
+                const result =
+                    await readResponse(response);
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        getErrorMessage(result)
+                    );
+
+                }
+
+
+                showMessage(
+                    "disbursementMessage",
+                    "Disbursement completed successfully.",
+                    true
+                );
+
+
+                form.reset();
+
+
+                await loadDashboard();
+
+            }
+
+            catch (error) {
+
+                showMessage(
+                    "disbursementMessage",
+                    error.message,
+                    false
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DISPLAY SCHEMES
+========================================================= */
+
+function displaySchemes(schemes) {
+
+    const table =
+        document.getElementById(
+            "schemeTableBody"
+        );
+
+
+    if (!table) {
+        return;
+    }
+
+
+    table.innerHTML = "";
+
+
+    schemes.forEach(function (scheme) {
+
+        const row =
+            document.createElement("tr");
+
+
+        row.innerHTML = `
+
+            <td>${scheme.schemeId}</td>
+
+            <td>${escapeHtml(
+            scheme.schemeName || "-"
+        )}</td>
+
+            <td>${escapeHtml(
+            scheme.description || "-"
+        )}</td>
+
+            <td>
+                ₹${Number(
+            scheme.incomeLimit || 0
+        ).toLocaleString("en-IN")}
+            </td>
+
+            <td>
+                ${scheme.minimumMarks || 0}%
+            </td>
+
+            <td>
+                ₹${Number(
+            scheme.scholarshipAmount || 0
+        ).toLocaleString("en-IN")}
+            </td>
+
+            <td>
+                ${scheme.status || "-"}
+            </td>
+
+        `;
+
+
+        table.appendChild(row);
+
+    });
+
+}
+
+
+/* =========================================================
+   DISPLAY APPLICATIONS
+========================================================= */
+
+function displayApplications(applications) {
+
+    const table =
+        document.getElementById(
+            "applicationTableBody"
+        );
+
+
+    const recentTable =
+        document.getElementById(
+            "recentApplicationTableBody"
+        );
+
+
+    if (table) {
+
+        table.innerHTML = "";
+
+        applications.forEach(function (application) {
+
+            table.appendChild(
+                createApplicationRow(application)
+            );
+
+        });
+
+    }
+
+
+    if (recentTable) {
+
+        recentTable.innerHTML = "";
+
+
+        const recentApplications =
+            [...applications]
+                .reverse()
+                .slice(0, 10);
+
+
+        recentApplications.forEach(
+            function (application) {
+
+                recentTable.appendChild(
+                    createApplicationRow(
+                        application
+                    )
+                );
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CREATE APPLICATION ROW
+========================================================= */
+
+function createApplicationRow(application) {
+
+    const row =
+        document.createElement("tr");
+
+
+    const studentName =
+        application.student
+            ? application.student.name
+            : "-";
+
+
+    const schemeName =
+        application.scheme
+            ? application.scheme.schemeName
+            : "-";
+
+
+    const eligibility =
+        application.eligibilityStatus || "-";
+
+
+    const status =
+        application.applicationStatus || "-";
+
+
+    row.innerHTML = `
+
+        <td>
+            ${application.applicationId}
+        </td>
+
+        <td>
+            ${escapeHtml(studentName)}
+        </td>
+
+        <td>
+            ${escapeHtml(schemeName)}
+        </td>
+
+        <td>
+            ${createStatusBadge(eligibility)}
+        </td>
+
+        <td>
+            ${createStatusBadge(status)}
+        </td>
+
+        <td>
+            ${escapeHtml(
+        application.remarks || "-"
+    )}
+        </td>
+
+    `;
+
+
+    return row;
+
+}
+
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
+
+function createStatusBadge(status) {
+
+    const value =
+        String(status)
+            .toUpperCase();
+
+
+    let className =
+        "status-badge";
+
+
+    if (value === "ELIGIBLE") {
+
+        className +=
+            " status-eligible";
+
+    }
+
+    else if (value === "UNDER_REVIEW") {
+
+        className +=
+            " status-review";
+
+    }
+
+    else if (value === "VERIFIED" ||
+        value === "APPROVED") {
+
+        className +=
+            " status-verified";
+
+    }
+
+    else if (value === "REJECTED") {
+
+        className +=
+            " status-rejected";
+
+    }
+
+    else if (value === "DISBURSED") {
+
+        className +=
+            " status-disbursed";
+
+    }
+
+
+    return `
+        <span class="${className}">
+            ${escapeHtml(status)}
+        </span>
+    `;
+
+}
+
+
+/* =========================================================
+   HELPER
+========================================================= */
+
+function setElement(id, value) {
 
     const element =
         document.getElementById(id);
@@ -129,453 +1010,99 @@ function setValue(id, value) {
 
     if (element) {
 
-        element.innerText = value;
-
-    }
-    else {
-
-        console.warn(
-            "HTML element not found: " + id
-        );
+        element.textContent =
+            value;
 
     }
 
 }
 
 
-/* =========================================================
-   RECENT APPLICATIONS
-========================================================= */
+function showMessage(id, message, success) {
 
-function updateApplications(applications) {
-
-    console.log(
-        "Updating Applications:",
-        applications.length
-    );
+    const element =
+        document.getElementById(id);
 
 
-    const tableBody =
-        document.getElementById(
-            "applicationTableBody"
-        );
-
-
-    if (!tableBody) {
-
-        console.error(
-            "applicationTableBody not found"
-        );
-
+    if (!element) {
         return;
-
     }
 
 
-    tableBody.innerHTML = "";
+    element.textContent =
+        message;
 
 
-    if (applications.length === 0) {
-
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5">
-                    No applications found
-                </td>
-            </tr>
-        `;
-
-        return;
-
-    }
-
-
-    applications.forEach(application => {
-
-
-        const studentName =
-            application.student &&
-            application.student.name
-                ? application.student.name
-                : "-";
-
-
-        const schemeName =
-            application.scheme &&
-            application.scheme.schemeName
-                ? application.scheme.schemeName
-                : "-";
-
-
-        const eligibility =
-            application.eligibilityStatus
-                ? application.eligibilityStatus
-                : "-";
-
-
-        const applicationStatus =
-            application.applicationStatus
-                ? application.applicationStatus
-                : "-";
-
-
-        const row =
-            document.createElement("tr");
-
-
-        row.innerHTML = `
-
-            <td>
-                ${application.applicationId}
-            </td>
-
-            <td>
-                ${studentName}
-            </td>
-
-            <td>
-                ${schemeName}
-            </td>
-
-            <td>
-                <span class="status ${getStatusClass(eligibility)}">
-                    ${eligibility}
-                </span>
-            </td>
-
-            <td>
-                <span class="status ${getStatusClass(applicationStatus)}">
-                    ${applicationStatus}
-                </span>
-            </td>
-
-        `;
-
-
-        tableBody.appendChild(row);
-
-    });
+    element.style.color =
+        success
+            ? "#16a34a"
+            : "#dc2626";
 
 }
 
 
-/* =========================================================
-   SCHOLARSHIP SCHEMES
-========================================================= */
+async function readResponse(response) {
 
-function updateSchemes(schemes) {
-
-    console.log(
-        "Updating Schemes:",
-        schemes.length
-    );
+    const text =
+        await response.text();
 
 
-    const tableBody =
-        document.getElementById(
-            "schemeTableBody"
-        );
-
-
-    if (!tableBody) {
-
-        console.error(
-            "schemeTableBody not found"
-        );
-
-        return;
-
+    if (!text) {
+        return {};
     }
 
 
-    tableBody.innerHTML = "";
+    try {
 
-
-    if (schemes.length === 0) {
-
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7">
-                    No scholarship schemes found
-                </td>
-            </tr>
-        `;
-
-        return;
+        return JSON.parse(text);
 
     }
 
-
-    schemes.forEach(scheme => {
-
-
-        const row =
-            document.createElement("tr");
-
-
-        row.innerHTML = `
-
-            <td>
-                ${scheme.schemeId}
-            </td>
-
-            <td>
-                ${scheme.schemeName}
-            </td>
-
-            <td>
-                ${scheme.description || "-"}
-            </td>
-
-            <td>
-                ₹${formatNumber(scheme.incomeLimit)}
-            </td>
-
-            <td>
-                ${scheme.minimumMarks}%
-            </td>
-
-            <td>
-                ₹${formatNumber(scheme.scholarshipAmount)}
-            </td>
-
-            <td>
-                <span class="status active">
-                    ${scheme.status || "ACTIVE"}
-                </span>
-            </td>
-
-        `;
-
-
-        tableBody.appendChild(row);
-
-    });
-
-}
-
-
-/* =========================================================
-   APPLICATION STATUS
-========================================================= */
-
-function updateApplicationStatus(applications) {
-
-
-    const eligible =
-        applications.filter(
-            application =>
-                application.eligibilityStatus ===
-                "ELIGIBLE"
-        ).length;
-
-
-    const underReview =
-        applications.filter(
-            application =>
-                application.applicationStatus ===
-                "UNDER_REVIEW"
-        ).length;
-
-
-    const verified =
-        applications.filter(
-            application =>
-                application.applicationStatus ===
-                "VERIFIED"
-        ).length;
-
-
-    const rejected =
-        applications.filter(
-            application =>
-                application.applicationStatus ===
-                "REJECTED"
-        ).length;
-
-
-    const disbursed =
-        applications.filter(
-            application =>
-                application.applicationStatus ===
-                "DISBURSED"
-        ).length;
-
-
-    console.log(
-        "Status:",
-        {
-            eligible,
-            underReview,
-            verified,
-            rejected,
-            disbursed
-        }
-    );
-
-
-    /* APPLICATION STATUS CARDS */
-
-    setValue(
-        "eligibleCount",
-        eligible
-    );
-
-
-    setValue(
-        "underReviewCount",
-        underReview
-    );
-
-
-    setValue(
-        "verifiedCount",
-        verified
-    );
-
-
-    setValue(
-        "rejectedCount",
-        rejected
-    );
-
-
-    setValue(
-        "disbursedCount",
-        disbursed
-    );
-
-}
-
-
-/* =========================================================
-   SYSTEM OVERVIEW
-========================================================= */
-
-function updateSystemOverview(applications) {
-
-
-    const eligible =
-        applications.filter(
-            application =>
-                application.eligibilityStatus ===
-                "ELIGIBLE"
-        ).length;
-
-
-    const verified =
-        applications.filter(
-            application =>
-                application.applicationStatus ===
-                "VERIFIED"
-        ).length;
-
-
-    const disbursed =
-        applications.filter(
-            application =>
-                application.applicationStatus ===
-                "DISBURSED"
-        ).length;
-
-
-    setValue(
-        "eligibleApplications",
-        eligible
-    );
-
-
-    setValue(
-        "verifiedApplications",
-        verified
-    );
-
-
-    setValue(
-        "disbursedApplications",
-        disbursed
-    );
-
-}
-
-
-/* =========================================================
-   STATUS CSS CLASS
-========================================================= */
-
-function getStatusClass(status) {
-
-    if (!status) {
-        return "";
-    }
-
-
-    switch (
-        status.toUpperCase()
-        ) {
-
-        case "ELIGIBLE":
-            return "eligible";
-
-
-        case "UNDER_REVIEW":
-            return "under-review";
-
-
-        case "VERIFIED":
-            return "verified";
-
-
-        case "REJECTED":
-            return "rejected";
-
-
-        case "DISBURSED":
-            return "disbursed";
-
-
-        case "ACTIVE":
-            return "active";
-
-
-        default:
-            return "";
+    catch {
+
+        return {
+            message: text
+        };
 
     }
 
 }
 
 
-/* =========================================================
-   NUMBER FORMAT
-========================================================= */
+function getErrorMessage(result) {
 
-function formatNumber(value) {
-
-    if (
-        value === null ||
-        value === undefined ||
-        value === ""
-    ) {
-
-        return "0";
-
+    if (!result) {
+        return "Request failed";
     }
 
 
-    return Number(value).toLocaleString(
-        "en-IN"
-    );
+    if (result.message) {
+        return result.message;
+    }
+
+
+    if (result.error) {
+        return result.error;
+    }
+
+
+    if (typeof result === "string") {
+        return result;
+    }
+
+
+    return "Request failed";
 
 }
 
 
-/* =========================================================
-   REFRESH DASHBOARD
-========================================================= */
+function escapeHtml(value) {
 
-function refreshDashboard() {
-
-    loadDashboard();
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 
 }

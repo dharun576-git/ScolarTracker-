@@ -1,158 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>ScholarTrack Dashboard</title>
+    <title>ScholarTrack - Scholarship Portal</title>
 
     <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 
 <body>
 
-<div class="sidebar">
+<div class="layout">
 
-    <div class="logo">
-        <div class="logo-icon"></div>
-        <div>
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
             <h2>ScholarTrack</h2>
-            <span>Scholarship Portal</span>
-        </div>
-    </div>
-
-    <div class="menu">
-
-        <a href="#" class="menu-item active" onclick="showSection('dashboard')">
-             Dashboard
-        </a>
-
-        <a href="#" class="menu-item" onclick="showSection('students')">
-             Students
-        </a>
-
-        <a href="#" class="menu-item" onclick="showSection('schemes')">
-             Schemes
-        </a>
-
-        <a href="#" class="menu-item" onclick="showSection('applications')">
-             Applications
-        </a>
-
-        <a href="#" class="menu-item" onclick="showSection('verification')">
-             Verification
-        </a>
-
-        <a href="#" class="menu-item" onclick="showSection('disbursement')">
-             Disbursement
-        </a>
-
-    </div>
-
-    <div class="sidebar-bottom">
-        <span>ScholarTrack</span>
-        <small>Management System</small>
-    </div>
-
-</div>
-
-
-<div class="main">
-
-    <header>
-
-        <div>
-            <h1 id="pageTitle">Dashboard</h1>
-            <p>Scholarship Application and Eligibility Tracker</p>
+            <p>Scholarship Portal</p>
         </div>
 
-        <div class="profile">
-            <div class="avatar">A</div>
+        <nav>
+
+            <a href="#dashboard" class="nav-link active">
+                Dashboard
+            </a>
+
+            <a href="#students" class="nav-link">
+                Students
+            </a>
+
+            <a href="#schemes" class="nav-link">
+                Schemes
+            </a>
+
+            <a href="#applications" class="nav-link">
+                Applications
+            </a>
+
+            <a href="#verification" class="nav-link">
+                Verification
+            </a>
+
+            <a href="#disbursement" class="nav-link">
+                Disbursement
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+        <!-- HEADER -->
+
+        <header class="topbar">
+
             <div>
-                <strong>Administrator</strong>
-                <small>System Admin</small>
-            </div>
-        </div>
-
-    </header>
-
-
-    <!-- DASHBOARD -->
-
-    <section id="dashboard" class="section active-section">
-
-        <div class="welcome">
-            <div>
-                <h2>Welcome to ScholarTrack </h2>
-                <p>Monitor scholarship applications, eligibility, verification and disbursement.</p>
+                <h1>Scholarship Management Dashboard</h1>
+                <p>Manage students, scholarships and applications</p>
             </div>
 
-            <button onclick="loadDashboard()"> Refresh</button>
-        </div>
+            <button class="refresh-btn" onclick="loadDashboard()">
+                Refresh
+            </button>
 
-        <div class="stats-grid">
+        </header>
 
-            <div class="stat-card">
-                <div class="stat-content">
-                    <p>Total Students</p>
-                    <h2 id="totalStudents">0</h2>
-                </div>
-            </div>
 
-            <div class="stat-card">
-                <div class="stat-content">
-                    <p>Total Schemes</p>
-                    <h2 id="totalSchemes">0</h2>
-                </div>
-            </div>
+        <!-- DASHBOARD -->
 
-            <div class="stat-card">
-                <div class="stat-content">
-                    <p>Total Applications</p>
-                    <h2 id="totalApplications">0</h2>
-                </div>
-            </div>
+        <section id="dashboard">
 
-            <div class="stat-card">
-                <div class="stat-content">
-                    <p>Completed Disbursement</p>
-                    <h2 id="totalDisbursements">0</h2>
-                </div>
-            </div>
+            <!-- STATISTICS -->
 
-        </div>
+            <div class="stats-grid">
 
-        <div class="dashboard-grid">
-
-            <div class="panel">
-
-                <div class="panel-header">
-                    <h3>Application Status</h3>
+                <div class="stat-card blue">
+                    <div class="stat-content">
+                        <p>Total Students</p>
+                        <h2 id="totalStudents">0</h2>
+                    </div>
                 </div>
 
-                <div class="status-list">
+                <div class="stat-card purple">
+                    <div class="stat-content">
+                        <p>Total Schemes</p>
+                        <h2 id="totalSchemes">0</h2>
+                    </div>
+                </div>
 
-                    <div class="status-row">
+                <div class="stat-card orange">
+                    <div class="stat-content">
+                        <p>Total Applications</p>
+                        <h2 id="totalApplications">0</h2>
+                    </div>
+                </div>
+
+                <div class="stat-card green">
+                    <div class="stat-content">
+                        <p>Completed Disbursement</p>
+                        <h2 id="totalDisbursements">0</h2>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- APPLICATION STATUS -->
+
+            <div class="content-card">
+
+                <div class="card-title">
+                    <h2>Application Status</h2>
+                </div>
+
+                <div class="status-grid">
+
+                    <div class="status-box">
                         <span>Eligible</span>
                         <strong id="eligibleCount">0</strong>
                     </div>
 
-                    <div class="status-row">
+                    <div class="status-box">
                         <span>Under Review</span>
-                        <strong id="reviewCount">0</strong>
+                        <strong id="underReviewCount">0</strong>
                     </div>
 
-                    <div class="status-row">
+                    <div class="status-box">
                         <span>Verified</span>
                         <strong id="verifiedCount">0</strong>
                     </div>
 
-                    <div class="status-row">
+                    <div class="status-box">
                         <span>Rejected</span>
                         <strong id="rejectedCount">0</strong>
                     </div>
 
-                    <div class="status-row">
+                    <div class="status-box">
                         <span>Disbursed</span>
                         <strong id="disbursedCount">0</strong>
                     </div>
@@ -162,309 +153,568 @@
             </div>
 
 
-            <div class="panel">
+            <!-- SYSTEM OVERVIEW -->
 
-                <div class="panel-header">
-                    <h3>System Overview</h3>
+            <div class="content-card">
+
+                <div class="card-title">
+                    <h2>System Overview</h2>
                 </div>
 
-                <div class="overview-card">
-                    <span>Eligible Applications</span>
-                    <strong id="eligibleApplications">0</strong>
+                <div class="overview-grid">
+
+                    <div>
+                        <span>Eligible Applications</span>
+                        <strong id="eligibleApplications">0</strong>
+                    </div>
+
+                    <div>
+                        <span>Verified Applications</span>
+                        <strong id="verifiedApplications">0</strong>
+                    </div>
+
+                    <div>
+                        <span>Disbursed Applications</span>
+                        <strong id="disbursedApplications">0</strong>
+                    </div>
+
                 </div>
-
-                <div class="overview-card">
-                    <span>Verified Applications</span>
-                    <strong id="verifiedApplications">0</strong>
-                </div>
-
-                <div class="overview-card">
-                    <span>Disbursed Applications</span>
-                    <strong id="disbursedApplications">0</strong>
-                </div>
-
-
 
             </div>
 
-        </div>
+        </section>
 
 
-        <div class="panel">
+        <!-- STUDENT SECTION -->
 
-            <div class="panel-header">
+        <section id="students" class="content-card">
 
-                <h3>Recent Applications</h3>
+            <div class="card-title">
 
-                <button onclick="showSection('applications')">
-                    View All
-                </button>
+                <div>
+                    <h2>Add Student</h2>
+                    <p>Register a new student in the scholarship system.</p>
+                </div>
 
             </div>
+
+
+            <form id="studentForm" class="form-grid">
+
+                <div class="form-group">
+                    <label>Student Name</label>
+                    <input
+                            type="text"
+                            id="studentName"
+                            placeholder="Enter student name"
+                            required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input
+                            type="email"
+                            id="studentEmail"
+                            placeholder="student@example.com"
+                            required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input
+                            type="text"
+                            id="studentPhone"
+                            placeholder="9876543210"
+                            required>
+                </div>
+
+                <div class="form-group">
+                    <label>Annual Income</label>
+                    <input
+                            type="number"
+                            id="studentIncome"
+                            placeholder="150000"
+                            min="0"
+                            required>
+                </div>
+
+                <div class="form-group">
+                    <label>Marks (%)</label>
+                    <input
+                            type="number"
+                            id="studentMarks"
+                            placeholder="85"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            required>
+                </div>
+
+                <div class="form-group">
+                    <label>Course</label>
+                    <input
+                            type="text"
+                            id="studentCourse"
+                            placeholder="CSE"
+                            required>
+                </div>
+
+                <div class="form-group">
+                    <label>Year</label>
+
+                    <select id="studentYear" required>
+
+                        <option value="">Select Year</option>
+
+                        <option value="1">
+                            1st Year
+                        </option>
+
+                        <option value="2">
+                            2nd Year
+                        </option>
+
+                        <option value="3">
+                            3rd Year
+                        </option>
+
+                        <option value="4">
+                            4th Year
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-button">
+                    <button type="submit">
+                        Add Student
+                    </button>
+                </div>
+
+            </form>
+
+            <div id="studentMessage" class="message"></div>
+
+        </section>
+
+
+        <!-- SCHEME SECTION -->
+
+        <section id="schemes" class="content-card">
+
+            <div class="card-title">
+
+                <div>
+                    <h2>Add Scholarship Scheme</h2>
+                    <p>Create a new scholarship scheme.</p>
+                </div>
+
+            </div>
+
+
+            <form id="schemeForm" class="form-grid">
+
+                <div class="form-group">
+                    <label>Scheme Name</label>
+
+                    <input
+                            type="text"
+                            id="schemeName"
+                            placeholder="Government Merit Scholarship"
+                            required>
+                </div>
+
+
+                <div class="form-group">
+                    <label>Description</label>
+
+                    <input
+                            type="text"
+                            id="schemeDescription"
+                            placeholder="Scholarship for eligible students"
+                            required>
+                </div>
+
+
+                <div class="form-group">
+                    <label>Income Limit</label>
+
+                    <input
+                            type="number"
+                            id="incomeLimit"
+                            placeholder="300000"
+                            min="0"
+                            required>
+                </div>
+
+
+                <div class="form-group">
+                    <label>Minimum Marks (%)</label>
+
+                    <input
+                            type="number"
+                            id="minimumMarks"
+                            placeholder="75"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            required>
+                </div>
+
+
+                <div class="form-group">
+                    <label>Scholarship Amount</label>
+
+                    <input
+                            type="number"
+                            id="scholarshipAmount"
+                            placeholder="50000"
+                            min="0"
+                            required>
+                </div>
+
+
+                <div class="form-group">
+                    <label>Status</label>
+
+                    <select id="schemeStatus">
+
+                        <option value="ACTIVE">
+                            ACTIVE
+                        </option>
+
+                        <option value="INACTIVE">
+                            INACTIVE
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-button">
+
+                    <button type="submit">
+                        Add Scheme
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            <div id="schemeMessage" class="message"></div>
+
+
+            <!-- SCHEME TABLE -->
 
             <div class="table-container">
 
                 <table>
 
                     <thead>
+
                     <tr>
                         <th>ID</th>
-                        <th>Student</th>
                         <th>Scheme</th>
-                        <th>Eligibility</th>
+                        <th>Description</th>
+                        <th>Income Limit</th>
+                        <th>Minimum Marks</th>
+                        <th>Amount</th>
                         <th>Status</th>
                     </tr>
+
                     </thead>
 
-                    <tbody id="recentApplications">
+                    <tbody id="schemeTableBody">
+
                     </tbody>
 
                 </table>
 
             </div>
 
-        </div>
-
-    </section>
+        </section>
 
 
-    <!-- STUDENTS -->
+        <!-- APPLICATION SECTION -->
 
-    <section id="students" class="section">
+        <section id="applications" class="content-card">
 
-        <div class="section-title">
-            <div>
-                <h2>Students</h2>
-                <p>Registered scholarship students</p>
-            </div>
+            <div class="card-title">
 
-            <button class="primary-btn" onclick="openStudentForm()">
-                + Add Student
-            </button>
-        </div>
-
-        <div class="panel">
-
-            <table>
-
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Income</th>
-                    <th>Marks</th>
-                    <th>Course</th>
-                    <th>Year</th>
-                </tr>
-                </thead>
-
-                <tbody id="studentTableBody"></tbody>
-
-            </table>
-
-        </div>
-
-    </section>
-
-
-    <!-- SCHEMES -->
-
-    <section id="schemes" class="section">
-
-        <div class="section-title">
-
-            <div>
-                <h2>Scholarship Schemes</h2>
-                <p>Available scholarship programs</p>
-            </div>
-
-            <button class="primary-btn" onclick="openSchemeForm()">
-                + Add Scheme
-            </button>
-
-        </div>
-
-        <div class="scheme-grid" id="schemeGrid"></div>
-
-    </section>
-
-
-    <!-- APPLICATIONS -->
-
-    <section id="applications" class="section">
-
-        <div class="section-title">
-
-            <div>
-                <h2>Applications</h2>
-                <p>Scholarship applications and eligibility status</p>
-            </div>
-
-            <button class="primary-btn" onclick="openApplicationForm()">
-                + New Application
-            </button>
-
-        </div>
-
-        <div class="panel">
-
-            <div class="table-section">
-
-                <div class="section-header">
-                    <h3>Recent Applications</h3>
-                    <span>View All</span>
+                <div>
+                    <h2>Submit Scholarship Application</h2>
+                    <p>Apply a student to a scholarship scheme.</p>
                 </div>
 
-                <div class="table-container">
-
-                    <table>
-
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Student</th>
-                            <th>Scheme</th>
-                            <th>Eligibility</th>
-                            <th>Status</th>
-                        </tr>
-                        </thead>
-
-                        <tbody id="applicationTableBody">
-                        </tbody>
-
-                    </table>
-
-                </div>
-                </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- VERIFICATION -->
-
-    <section id="verification" class="section">
-
-        <div class="section-title">
-
-            <div>
-                <h2>Document Verification</h2>
-                <p>Verify scholarship applications</p>
             </div>
 
-        </div>
 
-        <div class="panel">
+            <form id="applicationForm" class="form-grid">
 
-            <table>
+                <div class="form-group">
 
-                <thead>
+                    <label>Student ID</label>
 
-                <tr>
-                    <th>Application ID</th>
-                    <th>Student</th>
-                    <th>Scheme</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
+                    <input
+                            type="number"
+                            id="applicationStudentId"
+                            placeholder="1"
+                            min="1"
+                            required>
 
-                </thead>
-
-                <tbody id="verificationTable">
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
+                </div>
 
 
-    <!-- DISBURSEMENT -->
+                <div class="form-group">
 
-    <section id="disbursement" class="section">
+                    <label>Scheme ID</label>
 
-        <div class="section-title">
+                    <input
+                            type="number"
+                            id="applicationSchemeId"
+                            placeholder="1"
+                            min="1"
+                            required>
 
-            <div>
-                <h2>Disbursement</h2>
-                <p>Scholarship payment tracking</p>
+                </div>
+
+
+                <div class="form-button">
+
+                    <button type="submit">
+                        Submit Application
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            <div id="applicationMessage" class="message"></div>
+
+
+            <!-- APPLICATION TABLE -->
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Student</th>
+                        <th>Scheme</th>
+                        <th>Eligibility</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                    </tr>
+
+                    </thead>
+
+                    <tbody id="applicationTableBody">
+
+                    </tbody>
+
+                </table>
+
             </div>
 
-        </div>
+        </section>
 
-        <div class="panel">
 
-            <table>
+        <!-- VERIFICATION -->
 
-                <thead>
+        <section id="verification" class="content-card">
 
-                <tr>
-                    <th>ID</th>
-                    <th>Student</th>
-                    <th>Scheme</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                </tr>
+            <div class="card-title">
 
-                </thead>
+                <div>
+                    <h2>Application Verification</h2>
+                    <p>Review and verify scholarship applications.</p>
+                </div>
 
-                <tbody id="disbursementTableBody"></tbody>
+            </div>
 
-            </table>
 
-        </div>
+            <form id="verificationForm" class="form-grid">
 
-    </section>
+                <div class="form-group">
+
+                    <label>Application ID</label>
+
+                    <input
+                            type="number"
+                            id="verificationApplicationId"
+                            placeholder="1"
+                            min="1"
+                            required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Verifier Name</label>
+
+                    <input
+                            type="text"
+                            id="verifierName"
+                            placeholder="Admin"
+                            required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Verification Status</label>
+
+                    <select id="verificationStatus" required>
+
+                        <option value="">
+                            Select Status
+                        </option>
+
+                        <option value="APPROVED">
+                            APPROVED
+                        </option>
+
+                        <option value="REJECTED">
+                            REJECTED
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Remarks</label>
+
+                    <input
+                            type="text"
+                            id="verificationRemarks"
+                            placeholder="Documents verified successfully">
+
+                </div>
+
+
+                <div class="form-button">
+
+                    <button type="submit">
+                        Submit Verification
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            <div id="verificationMessage" class="message"></div>
+
+        </section>
+
+
+        <!-- DISBURSEMENT -->
+
+        <section id="disbursement" class="content-card">
+
+            <div class="card-title">
+
+                <div>
+                    <h2>Scholarship Disbursement</h2>
+                    <p>Complete scholarship payment after verification approval.</p>
+                </div>
+
+            </div>
+
+
+            <form id="disbursementForm" class="form-grid">
+
+                <div class="form-group">
+
+                    <label>Application ID</label>
+
+                    <input
+                            type="number"
+                            id="disbursementApplicationId"
+                            placeholder="1"
+                            min="1"
+                            required>
+
+                </div>
+
+
+                <div class="form-button">
+
+                    <button type="submit">
+                        Complete Disbursement
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            <div id="disbursementMessage" class="message"></div>
+
+        </section>
+
+
+        <!-- RECENT APPLICATIONS -->
+
+        <section class="content-card">
+
+            <div class="card-title">
+
+                <div>
+                    <h2>Recent Applications</h2>
+                    <p>Latest scholarship applications.</p>
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Student</th>
+                        <th>Scheme</th>
+                        <th>Eligibility</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                    </tr>
+
+                    </thead>
+
+                    <tbody id="recentApplicationTableBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+    </main>
 
 </div>
 
-
-<!-- MODAL -->
-
-<div id="modal" class="modal">
-
-    <div class="modal-content">
-
-        <div class="modal-header">
-
-            <h2 id="modalTitle">Add</h2>
-
-            <span onclick="closeModal()">×</span>
-
-        </div>
-
-        <div id="modalBody"></div>
-
-    </div>
-
-</div>
-<section class="dashboard-section">
-    <h2>Scholarship Schemes</h2>
-
-    <div class="table-container">
-        <table>
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Scheme Name</th>
-                <th>Description</th>
-                <th>Income Limit</th>
-                <th>Minimum Marks</th>
-                <th>Scholarship Amount</th>
-                <th>Status</th>
-            </tr>
-            </thead>
-
-            <tbody id="schemeTableBody">
-            <!-- Database scheme records will appear here -->
-            </tbody>
-        </table>
-    </div>
-</section>
 
 <script src="/js/dashboard.js"></script>
+
 </body>
+
 </html>
